@@ -7,26 +7,24 @@ const authConfig = {
 };
 
 export default async (req, res, next) => {
+  const authHeaders = req.headers.authorization;
 
-  // const authHeaders = req.headers.authorization;
+  if (!authHeaders) {
+    return res.status(401).json({ error: 'Token não enviado!' });
+  }
 
+  const [, token] = authHeaders.split(' ');
 
-  // if (!authHeaders) {
-  //   return res.status(401).json({ error: 'Token não enviado!' });
-  // }
+  try {
+    const decodificarsenha = await promisify(jwt.verify)(
+      token,
+      authConfig.secret
+    );
 
-  // const [, token] = authHeaders.split(' ');
+    req.userId = decodificarsenha.id;
 
-  // try {
-  //   const decodificarsenha = await promisify(jwt.verify)(
-  //     token,
-  //     authConfig.secret
-  //   );
-
-  //   req.userId = decodificarsenha.id;
-
-  //   return next();
-  // } catch (err) {
-  //   return res.status(401).json({ error: 'Token invalido!' });
-  // }
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Token invalido!' });
+  }
 };

@@ -1,20 +1,25 @@
-import User from '../db/schemas/user/userSchema';
-
+import User from '../model/userSchema';
+import connection from '../db/connection';
 class userController {
+  
+  async index(req, res) {
+    return res.json({ message: 'oi' });
+  }
 
-    async index(req, res){
+  async store(req, res) {
+    const { name, email, password } = req.body;
 
-    };
+    const user = new User({
+      name: name,
+      email: email,
+      password: password,
+    });
 
-    async store(req, res) {
-      const user = await User.create({name:`kelvin`});
-      return res.json(user);
-    };
-
-    async update(req,res) {
-
-    };
-
+    user.save(() => {
+      res.json({ message: 'ok' });
+    });
+  };
+  
 };
 
 export default new userController();
