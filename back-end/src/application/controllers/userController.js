@@ -1,9 +1,7 @@
 import bcryptpjs from 'bcryptjs';
 import User from '../model/userSchema';
-import connection from '../db/connection';
 
 class userController {
-  
   async index(req, res) {
     return res.json({ message: 'oi' });
   }
@@ -11,20 +9,23 @@ class userController {
   async store(req, res) {
     const { name, email, password } = req.body;
 
+    if (email) {
+      const verifyExist = await User.findOne({ email });
+      if (verifyExist) {
+        return res.status(400).json({ message: 'Usuário já cadastrado' });
+      }
+    }
+
     const hashPassword = await bcryptpjs.hash(password, 8);
 
-    const user = await User.create({
-      name: name,
-      email: email,
+    await User.create({
+      name,
+      email,
       password: hashPassword,
     });
 
-    return res.json({ message: 'ok' });
-    // user.save(() => {
-    //   res.json({ message: 'ok' });
-    // });
-  };
-  
-};
+    return res.status(200).json({ message: 'Usuário cadastrado com sucesso' });
+  }
+}
 
 export default new userController();

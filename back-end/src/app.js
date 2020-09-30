@@ -1,5 +1,6 @@
 import express from 'express';
 import routes from './routes';
+import connection from '../src/application/db/connection';
 
 class App {
   constructor() {
@@ -17,4 +18,3 @@ class App {
   }
 }
 export default new App().server;
-
