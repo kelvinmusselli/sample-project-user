@@ -3,7 +3,20 @@ import User from '../model/userSchema';
 
 class UserController {
   async index(req, res) {
-    return res.json({ message: 'oi' });
+
+    const { email } = req.params;
+
+    if (email) {
+      const user = await User.findOne({ email });
+      if (user) {
+        return res.status(200).json({ user });
+      }
+      return res.status(400).json({ message: 'Usuário não encontrado' });
+    }
+
+    const user = await User.find();
+
+    return res.status(200).json({ user });
   }
 
   async store(req, res) {

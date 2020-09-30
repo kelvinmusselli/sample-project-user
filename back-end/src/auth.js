@@ -12,12 +12,12 @@ export default async (req, res, next) => {
   const [, token] = authHeaders.split(' ');
 
   try {
-    const decodificarsenha = await promisify(jwt.verify)(
+    const decodePassword = await promisify(jwt.verify)(
       token,
       authConfig.secret
     );
 
-    req.userId = decodificarsenha.id;
+    req.userId = decodePassword.id;
 
     return next();
   } catch (err) {

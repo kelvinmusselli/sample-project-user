@@ -1,4 +1,4 @@
 export default {
-  secret: 'kelvintestejwt',
+  secret: 'a2VsdmludGVzdGVqd3Q=',
   expiresIn: '7d',
 };
