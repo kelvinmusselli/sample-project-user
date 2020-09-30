@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import bcryptpjs from 'bcryptjs';
 import * as Yup from 'yup';
 import User from '../model/userSchema';
@@ -28,8 +29,9 @@ class UserController {
       password: Yup.string().required().min(6),
     });
 
-    if(!(await schema.isValid(req.body))){
-      return res.status(400).json({ error:"Validação falhou! linha 14", });
+    if (!(await schema.isValid(req.body))) {
+      console.log(await schema.typeError());
+      return res.status(400).json({ error: 'Validação falhou! linha 14' });
     }
 
     const { name, email, password } = req.body;
@@ -68,6 +70,7 @@ class UserController {
     }
 
     const { id, name, provider } = await update(req.body);
+    return;
   }
 }
 
