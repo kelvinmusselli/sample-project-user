@@ -1,14 +1,14 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-// import UserController from './app/controllers/UserController';
-// import SessionController from './app/controllers/SessionController';
+import userController from './application/controllers/userController';
+import sessionController from './application/controllers/sessionController';
 
-import authMiddleware from "./auth";
+import authMiddleware from './auth';
 
 const routes = new Router();
 
-// routes.post('/users', UserController.store);
-// routes.post('/sessions', SessionController.store);
+routes.post('/users', userController.store);
+routes.post('/session', sessionController.Create);
 
 routes.use(authMiddleware);
 

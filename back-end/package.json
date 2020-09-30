@@ -4,7 +4,7 @@
   "description": "",
   "main": "./server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node --exec sucrase-node ./server.js",
     "dev": "nodemon --exec sucrase-node ./server.js",
     "test": "yarn test"
   },
