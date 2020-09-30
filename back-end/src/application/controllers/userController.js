@@ -1,5 +1,7 @@
+import bcryptpjs from 'bcryptjs';
 import User from '../model/userSchema';
 import connection from '../db/connection';
+
 class userController {
   
   async index(req, res) {
@@ -9,15 +11,18 @@ class userController {
   async store(req, res) {
     const { name, email, password } = req.body;
 
-    const user = new User({
+    const hashPassword = await bcryptpjs.hash(password, 8);
+
+    const user = await User.create({
       name: name,
       email: email,
-      password: password,
+      password: hashPassword,
     });
 
-    user.save(() => {
-      res.json({ message: 'ok' });
-    });
+    return res.json({ message: 'ok' });
+    // user.save(() => {
+    //   res.json({ message: 'ok' });
+    // });
   };
   
 };

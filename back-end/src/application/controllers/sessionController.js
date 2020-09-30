@@ -1,55 +1,44 @@
-// import jwt from 'jsonwebtoken';
-// import auth from '../../auth';
-// import User from '../db/schemas/user/userSchema';
+import User from '../model/userSchema';
+import jwt from 'jsonwebtoken';
+import authConfig from '../../authConfig'
+import bcrypt from 'bcryptjs';
+
+class sessionController {
 
 
-// class sessionController {
-//     async Create(req, res){
 
-//         const body = req.body;
+    async create(req, res){
+      
+      const checkPassword = (password, password_hash) =>{
+        return bcrypt.compare(password, password_hash)
+      };
 
-//           const user = await User.create({
-//             name:body.name,
-//             email:body.email,
-//             password:body.password
-//           });
-//           console.log('====================================');
+        const { email, password } = req.body;
 
-//           console.log('====================================');
-//           console.log(user)
-//           // return res.json({user});
+        const user = await User.findOne({ email });
 
-//         //   return res.json({
-//         //     user:user,
-//         //     token:jwt.sign({ id,  }, auth.secret, {
-//         //         expiresIn: auth.expiresIn,
-//         //     }),
-//         //     message:"Autenticado com sucesso!"
-//         // });
+        if(!user){
+            return res.status(401).json({error:"Usuário não existente"});
+        }
 
-//         return
+        if(!(await checkPassword(password, user.password))){
+            return res.status(401).json({ error: "Senha invalida" });
+        }
 
-//             // return res.status(401).json({error:"Usuário não existente"});
+        const { id, name } = user;
 
+        return res.json({
+            user:{
+                id,
+                name,
+                email
+            }, 
+            token:jwt.sign({ id,  }, authConfig.secret, { 
+                expiresIn: authConfig.expiresIn,
+            }),
+            message:"Autenticado com sucesso!"
+        });
+    }
+}
 
-//         // if(!(await user.checkPassword(password))){
-//         //     return res.status(401).json({ error: "Senha invalida" });
-//         // }
-
-//         // const { id, name } = user;
-
-//         // return res.json({
-//         //     user:{
-//         //         id,
-//         //         name,
-//         //         email
-//         //     },
-//         //     token:jwt.sign({ id,  }, auth.secret, {
-//         //         expiresIn: auth.expiresIn,
-//         //     }),
-//         //     message:"Autenticado com sucesso!"
-//         // });
-//     }
-// }
-
-// export default new sessionController();
+export default new sessionController();
