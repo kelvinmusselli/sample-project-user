@@ -1,7 +1,7 @@
 import bcryptpjs from 'bcryptjs';
 import User from '../model/userSchema';
 
-class userController {
+class UserController {
   async index(req, res) {
     return res.json({ message: 'oi' });
   }
@@ -28,4 +28,4 @@ class userController {
   }
 }
 
-export default new userController();
+export default new UserController();

@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../model/userSchema';
 import authConfig from '../../authConfig';
 
-class sessionController {
+class SessionController {
   async create(req, res) {
     const checkPassword = (password, password_hash) => {
       return bcrypt.compare(password, password_hash);
@@ -37,4 +37,4 @@ class sessionController {
   }
 }
 
-export default new sessionController();
+export default new SessionController();
