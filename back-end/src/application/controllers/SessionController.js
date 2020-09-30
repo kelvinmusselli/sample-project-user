@@ -1,14 +1,10 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import User from '../model/userSchema';
 import authConfig from '../../authConfig';
+import checkPassword from '../utils/checkPassword';
 
 class SessionController {
   async create(req, res) {
-    const checkPassword = (password, password_hash) => {
-      return bcrypt.compare(password, password_hash);
-    };
-
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });

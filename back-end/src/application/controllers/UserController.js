@@ -1,5 +1,7 @@
 import bcryptpjs from 'bcryptjs';
+import * as Yup from 'yup';
 import User from '../model/userSchema';
+import checkPassword from '../utils/checkPassword';
 
 class UserController {
   async index(req, res) {
@@ -19,6 +21,17 @@ class UserController {
   }
 
   async store(req, res) {
+
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string().email().required(),
+      password: Yup.string().required().min(6),
+    });
+
+    if(!(await schema.isValid(req.body))){
+      return res.status(400).json({ error:"Validação falhou! linha 14", });
+    }
+
     const { name, email, password } = req.body;
 
     if (email) {
@@ -30,13 +43,31 @@ class UserController {
 
     const hashPassword = await bcryptpjs.hash(password, 8);
 
-    await User.create({
-      name,
-      email,
-      password: hashPassword,
-    });
+    await User.create({ name, email, password: hashPassword });
 
     return res.status(200).json({ message: 'Usuário cadastrado com sucesso' });
+  }
+
+  async update(req, res) {
+
+    const { email, oldPassword, newPassword } = req.body;
+
+    const user = await User.findByPk(req.userId);
+
+    if (email !== user.email) {
+      const userExists = await User.findOne({ email });
+      if (userExists) {
+        return res.status(400).json({ error: 'Este usuário já existe!' });
+      }
+    }
+
+    if (oldPassword && !(await checkPassword(oldPassword, user.password))) {
+      return res
+        .status(401)
+        .json({ error: 'Senha não corresponde com a atual' });
+    }
+
+    const { id, name, provider } = await update(req.body);
   }
 }
 
