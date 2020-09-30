@@ -3,7 +3,6 @@ import User from '../model/userSchema';
 
 class UserController {
   async index(req, res) {
-
     const { email } = req.params;
 
     if (email) {
