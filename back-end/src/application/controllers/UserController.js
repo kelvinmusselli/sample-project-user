@@ -32,7 +32,7 @@ class UserController {
 
     if (!(await schema.isValid(req.body))) {
       console.log(await schema.typeError());
-      return res.status(400).json({ error: 'Validação falhou! linha 14' });
+      return res.status(400).json({ error: 'Validação falhou!' });
     }
 
     const { name, email, password } = req.body;
@@ -52,6 +52,19 @@ class UserController {
   }
 
   async update(req, res) {
+
+    const schema = Yup.object().shape({
+      name: Yup.string().required(),
+      email: Yup.string().email().required(),
+      password: Yup.string().required().min(6),
+      newPassword: Yup.string().min(6),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      console.log(await schema.typeError());
+      return res.status(400).json({ error: 'Validação falhou!' });
+    }
+
     const { _id, email, name, password, newPassword } = req.body;
 
     const user = await User.findById({ _id });
