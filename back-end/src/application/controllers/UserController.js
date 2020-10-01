@@ -80,7 +80,9 @@ class UserController {
           password:hashPassword
         }
       });
-    return res.status(200).json(updated);
+    return res
+      .status(200)
+      .json({ message: 'Informações de usuário atualizadas com sucesso' });
   }
 }
 
