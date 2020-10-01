@@ -71,15 +71,16 @@ class UserController {
 
     const hashPassword = newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
 
-    const updated = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       { _id: new Object(_id) },
       {
         $set: {
-          name:name,
-          email:email,
-          password:hashPassword
-        }
-      });
+          name: name,
+          email: email,
+          password: hashPassword,
+        },
+      }
+    );
     return res
       .status(200)
       .json({ message: 'Informações de usuário atualizadas com sucesso' });
