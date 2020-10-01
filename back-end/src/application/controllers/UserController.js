@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-console */
 import bcryptpjs from 'bcryptjs';
 import * as Yup from 'yup';
@@ -51,26 +52,35 @@ class UserController {
   }
 
   async update(req, res) {
+    const { _id, email, name, password, newPassword } = req.body;
 
-    const { email, oldPassword, newPassword } = req.body;
-
-    const user = await User.findByPk(req.userId);
+    const user = await User.findById({ _id });
 
     if (email !== user.email) {
       const userExists = await User.findOne({ email });
       if (userExists) {
-        return res.status(400).json({ error: 'Este usuário já existe!' });
+        return res.status(400).json({ error: 'Este email já existe!' });
       }
     }
 
-    if (oldPassword && !(await checkPassword(oldPassword, user.password))) {
+    if (password && !(await checkPassword(password, user.password))) {
       return res
         .status(401)
         .json({ error: 'Senha não corresponde com a atual' });
     }
 
-    const { id, name, provider } = await update(req.body);
-    return;
+    const hashPassword = newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
+
+    const updated = await User.findByIdAndUpdate(
+      { _id: new Object(_id) },
+      {
+        $set: {
+          name:name,
+          email:email,
+          password:hashPassword
+        }
+      });
+    return res.status(200).json(updated);
   }
 }
 
