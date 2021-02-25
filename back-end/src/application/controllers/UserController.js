@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import bcryptpjs from 'bcryptjs';
 import * as Yup from 'yup';
+import mongoose from 'mongoose';
 import User from '../model/userSchema';
 import checkPassword from '../utils/checkPassword';
 
@@ -54,20 +55,26 @@ class UserController {
   async update(req, res) {
 
     const schema = Yup.object().shape({
-      name: Yup.string().required(),
-      email: Yup.string().email().required(),
-      password: Yup.string().required().min(6),
+      name: Yup.string(),
+      email: Yup.string().email(),
+      password: Yup.string().min(6),
       newPassword: Yup.string().min(6),
     });
 
     if (!(await schema.isValid(req.body))) {
-      console.log(await schema.typeError());
+      console.log(schema.typeError());
       return res.status(400).json({ error: 'Validação falhou!' });
     }
 
-    const { _id, email, name, password, newPassword } = req.body;
+    const idUser = req.params.id;
+    const { email, name, password, newPassword } = req.body;
 
-    const user = await User.findById({ _id });
+    const user = await User.findById({_id: mongoose.Types.ObjectId(idUser) });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Este usuário não existe' });
+    }
+
 
     if (email !== user.email) {
       const userExists = await User.findOne({ email });
@@ -85,13 +92,9 @@ class UserController {
     const hashPassword = newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
 
     await User.findByIdAndUpdate(
-      { _id: new Object(_id) },
+      { _id: mongoose.Types.ObjectId(idUser) },
       {
-        $set: {
-          name: name,
-          email: email,
-          password: hashPassword,
-        },
+        $set: { name, email, password: hashPassword },
       }
     );
     return res
