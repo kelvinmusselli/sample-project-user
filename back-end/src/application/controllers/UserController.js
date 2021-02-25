@@ -99,18 +99,25 @@ class UserController {
       }
     }
 
+
     if (password && !(await checkPassword(password, user.password))) {
       return res
         .status(401)
         .json({ error: 'Senha não corresponde com a atual' });
     }
+   
+    const hashPassword = password && newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(user.password, 8);
 
-    const hashPassword = password && newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
-
+    const objForUpdate = { 
+      name: name || user.name,
+      email: email || user.email,
+      hashPassword
+    }
+  
     await User.findByIdAndUpdate(
       { _id: mongoose.Types.ObjectId(idUser) },
       {
-        $set: { name, email, password: hashPassword },
+        $set: objForUpdate,
       }
     );
     return res
