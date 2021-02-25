@@ -23,6 +23,21 @@ class UserController {
     return res.status(200).json({ user });
   }
 
+  async delete(req, res) {
+    const idUser = req.params.id;
+    if(!idUser){
+      return res.status(400).json({ error: 'É necessário passar um id como parâmetro' });
+    }
+
+    const user = await User.findByIdAndRemove({_id: mongoose.Types.ObjectId(idUser) });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Este usuário não existe' });
+    }
+
+    return res.status(200).json({ message: 'Usuário removido com sucesso' });
+  }
+
   async store(req, res) {
 
     const schema = Yup.object().shape({
@@ -75,11 +90,12 @@ class UserController {
       return res.status(400).json({ error: 'Este usuário não existe' });
     }
 
-
-    if (email !== user.email) {
-      const userExists = await User.findOne({ email });
-      if (userExists) {
-        return res.status(400).json({ error: 'Este email já existe!' });
+    if(email) {
+      if (email !== user.email) {
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+          return res.status(400).json({ error: 'Este email já existe!' });
+        }
       }
     }
 
@@ -89,7 +105,7 @@ class UserController {
         .json({ error: 'Senha não corresponde com a atual' });
     }
 
-    const hashPassword = newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
+    const hashPassword = password && newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(password, 8);
 
     await User.findByIdAndUpdate(
       { _id: mongoose.Types.ObjectId(idUser) },
