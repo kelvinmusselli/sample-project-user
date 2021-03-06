@@ -42,16 +42,20 @@ class UserController {
 
     const schema = Yup.object().shape({
       name: Yup.string().required(),
+      surname:Yup.string().required(),
       email: Yup.string().email().required(),
+      age: Yup.number().required().positive().integer(),
+      cpf:Yup.string().required().min(11),
+      phone: Yup.string().required().max(12),
       password: Yup.string().required().min(6),
     });
 
     if (!(await schema.isValid(req.body))) {
-      console.log(await schema.typeError());
-      return res.status(400).json({ error: 'Validação falhou!' });
+      console.log(schema.typeError());
+      return res.status(400).json({ error: 'Dados enviados, são invalidos...' });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, age, phone, surname, cpf } = req.body;
 
     if (email) {
       const verifyExist = await User.findOne({ email });
@@ -62,7 +66,17 @@ class UserController {
 
     const hashPassword = await bcryptpjs.hash(password, 8);
 
-    await User.create({ name, email, password: hashPassword });
+    const objForUpdate = {
+      name,
+      email,
+      password: hashPassword,
+      age,
+      phone,
+      cpf,
+      surname
+    };
+
+    await User.create(objForUpdate);
 
     return res.status(200).json({ message: 'Usuário cadastrado com sucesso' });
   }
@@ -72,9 +86,20 @@ class UserController {
     const schema = Yup.object().shape({
       name: Yup.string(),
       email: Yup.string().email(),
-      password: Yup.string().min(6),
-      newPassword: Yup.string().min(6),
+      oldPassword: Yup.string().min(6),
+      password: Yup.string()
+        .min(6)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      confirmPassword: Yup.string().when('password', (password, field) =>
+        password ? field.required().oneOf([Yup.ref('password')]) : field
+      ),
+      age: Yup.number(),
+      cpf:Yup.string().min(11),
+      phone: Yup.string().max(12),
     });
+
 
     if (!(await schema.isValid(req.body))) {
       console.log(schema.typeError());
@@ -82,7 +107,17 @@ class UserController {
     }
 
     const idUser = req.params.id;
-    const { email, name, password, newPassword } = req.body;
+    const {
+      email,
+      name,
+      oldPassword,
+      newPassword,
+      confirmPassword,
+      age,
+      phone,
+      surname,
+      cpf
+    } = req.body;
 
     const user = await User.findById({_id: mongoose.Types.ObjectId(idUser) });
 
@@ -99,21 +134,26 @@ class UserController {
       }
     }
 
-
-    if (password && !(await checkPassword(password, user.password))) {
+    if (oldPassword && !(await checkPassword(oldPassword, user.password))) {
       return res
         .status(401)
         .json({ error: 'Senha não corresponde com a atual' });
     }
-   
-    const hashPassword = password && newPassword ? await bcryptpjs.hash(newPassword, 8) : await bcryptpjs.hash(user.password, 8);
 
-    const objForUpdate = { 
+    const hashPassword = oldPassword && confirmPassword && newPassword
+                          ? await bcryptpjs.hash(confirmPassword, 8)
+                          : user.password
+
+    const objForUpdate = {
       name: name || user.name,
+      surname: surname || user.surname,
       email: email || user.email,
-      hashPassword
-    }
-  
+      password: hashPassword,
+      age : age || user.age,
+      phone: phone || user.phone,
+      cpf: cpf || user.cpf
+    };
+
     await User.findByIdAndUpdate(
       { _id: mongoose.Types.ObjectId(idUser) },
       {
