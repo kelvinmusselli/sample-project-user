@@ -12,7 +12,6 @@ routes.post('/session', SessionController.create);
 routes.use(authMiddleware);
 
 // GET USER BY PARAM OR NOTHING
-routes.get('/users/:email', UserController.index);
 routes.get('/users', UserController.index);
 routes.put('/users/:id', UserController.update);
 routes.delete('/users/:id', UserController.delete);

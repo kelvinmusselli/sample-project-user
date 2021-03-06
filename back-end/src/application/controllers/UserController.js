@@ -8,7 +8,8 @@ import checkPassword from '../utils/checkPassword';
 
 class UserController {
   async index(req, res) {
-    const { email } = req.params;
+
+    const { email } = req.body;
 
     if (email) {
 
@@ -27,7 +28,9 @@ class UserController {
   }
 
   async delete(req, res) {
+
     const idUser = req.params.id;
+
     if(!idUser){
       return res.status(400).json({ error: 'É necessário passar um id como parâmetro' });
     }
