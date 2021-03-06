@@ -11,10 +11,13 @@ class UserController {
     const { email } = req.params;
 
     if (email) {
+
       const user = await User.findOne({ email });
+
       if (user) {
         return res.status(200).json({ user });
       }
+
       return res.status(400).json({ message: 'Usuário não encontrado' });
     }
 
@@ -48,6 +51,7 @@ class UserController {
       cpf:Yup.string().required().min(11),
       phone: Yup.string().required().max(12),
       password: Yup.string().required().min(6),
+      isAdmin: Yup.boolean()
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -98,6 +102,7 @@ class UserController {
       age: Yup.number(),
       cpf:Yup.string().min(11),
       phone: Yup.string().max(12),
+      isAdmin: Yup.boolean()
     });
 
 
@@ -116,7 +121,8 @@ class UserController {
       age,
       phone,
       surname,
-      cpf
+      cpf,
+      isAdmin,
     } = req.body;
 
     const user = await User.findById({_id: mongoose.Types.ObjectId(idUser) });
@@ -151,7 +157,8 @@ class UserController {
       password: hashPassword,
       age : age || user.age,
       phone: phone || user.phone,
-      cpf: cpf || user.cpf
+      cpf: cpf || user.cpf,
+      isAdmin: isAdmin || user.isAdmin
     };
 
     await User.findByIdAndUpdate(
